@@ -8,7 +8,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
-#include <windows.h>
+// #include <windows.h> // replaced with ANSI escape codes for macOS/Linux
 
 namespace hue
 {
@@ -98,11 +98,15 @@ namespace hue
             "BAD COLOR";
     }
 
+    inline int& current_color_ref()
+    {
+        static int color = DEFAULT_COLOR;
+        return color;
+    }
+
     int get()
     {
-        CONSOLE_SCREEN_BUFFER_INFO i;
-        return GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &i) ?
-            i.wAttributes : BAD_COLOR;
+        return current_color_ref();
     }
 
     int get_text()
@@ -117,8 +121,11 @@ namespace hue
 
     void set(int c)
     {
-        if (is_good(c))
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), c);
+        if (!is_good(c)) return;
+        current_color_ref() = c;
+        static const int text_ansi[] = {30,34,32,36,31,35,33,37,90,94,92,96,91,95,93,97};
+        static const int bg_ansi[]   = {40,44,42,46,41,45,43,47,100,104,102,106,101,105,103,107};
+        std::cout << "\033[" << text_ansi[c % 16] << "m\033[" << bg_ansi[c / 16] << "m";
     }
 
     void set(int a, int b)
@@ -143,7 +150,8 @@ namespace hue
 
     void reset()
     {
-        set(DEFAULT_COLOR);
+        current_color_ref() = DEFAULT_COLOR;
+        std::cout << "\033[0m";
     }
 
     int invert(int c)

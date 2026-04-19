@@ -25,7 +25,7 @@ using namespace std;
    |
    |-- solver.h
    |   |
-   |   |> Generación y resolución de matrices.
+   |   |> Generacion y resolucion de matrices.
    |
    |-- operations.h
    |   |
@@ -39,10 +39,6 @@ using namespace std;
 
 int main()
 {
-    /*
-    Funcion principal del programa, se encargara de pedir infinitamente la opcion deseada
-    y ejecutar las funciones acordes, si la opcion ingresada es "9" el programa finalizara.
-    */
     vector<vector<Coeficient>> linearSystem;
     vector<vector<Coeficient>> emptyVector;
     vector<vector<double>> m1;
@@ -50,26 +46,30 @@ int main()
     while (true)
     {
         int option;
-        system("cls");
+        system("clear");
         printMenu();
         cin >> option;
         switch (option)
         {
         case 1:
+        {
             int amountOfEq;
             cout << "Introduce el numero de ecuaciones a ingresar: ";
             cin >> amountOfEq;
+            linearSystem = emptyVector;
             for (int i = 0; i < amountOfEq; i++)
             {
                 string equation;
-                cout << "Introduce la ecuacion " << i + 1 << ": ";
+                cout << "Introduce la ecuacion " << i + 1 << " (ej: 4x+1y=-3): ";
                 cin >> equation;
                 vector<Coeficient> parsedEquation = parseEqCoeficients(equation);
                 linearSystem.push_back(parsedEquation);
             }
+            system("clear");
             fillMatrixFromParsedEquation(linearSystem);
-            linearSystem = emptyVector; // reset
+            linearSystem = emptyVector;
             break;
+        }
         case 2:
             fillMatrix();
             break;
@@ -97,16 +97,15 @@ int main()
             determinant(m1);
             break;
         case 8:
-            system("cls");
+            system("clear");
             help();
-            system("pause");
+            pauseScreen();
             break;
         case 9:
-            exit(0);
             return 0;
         default:
             cout << "Opcion no valida." << endl;
-            system("pause");
+            pauseScreen();
         }
     }
     return 0;

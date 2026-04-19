@@ -1,29 +1,40 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include "ui.h"
 #include "color.hpp"
 #include "eqparser.h"
 
 using namespace std;
 
-
-
 void solve(vector<vector<double>> matrix, int n)
 {
     /*
-    Tomara como parametro un vector de vectores formados por doubles y un entero n.
-    Luego resolovera la matriz utilizando el metodo de Gauss-Jordan e imprimira
-    cada uno de los pasos realizados junto al resultado final.
+    Resuelve un sistema NxN usando Gauss-Jordan con pivoteo parcial.
+    Muestra cada paso hasta obtener la matriz identidad aumentada.
     */
-    vector<double> result(n, 0);
-    
     for (int i = 0; i < n; i++)
     {
-        if (matrix[i][i] == 0.0)
+        // Pivoteo parcial: buscar la fila con mayor valor absoluto en la columna i
+        int maxRow = i;
+        for (int k = i + 1; k < n; k++) {
+            if (fabs(matrix[k][i]) > fabs(matrix[maxRow][i]))
+                maxRow = k;
+        }
+        if (maxRow != i) {
+            swap(matrix[i], matrix[maxRow]);
+            string swapAction = "Intercambio Fila " + to_string(i + 1) + " <-> Fila " + to_string(maxRow + 1);
+            cout << dye::colorize(swapAction, "yellow") << endl;
+            printAugmentedMatrix(matrix);
+            cout << endl;
+        }
+
+        if (fabs(matrix[i][i]) < 1e-12)
         {
-            cout << "No puedes dividir por 0." << endl;
-            break;
+            cout << dye::colorize("El sistema no tiene solucion unica (pivote nulo en columna " + to_string(i + 1) + ").", "red") << endl;
+            pauseScreen();
+            return;
         }
 
         for (int j = 0; j < n; j++)
@@ -35,40 +46,41 @@ void solve(vector<vector<double>> matrix, int n)
                 {
                     matrix[j][k] = matrix[j][k] - ratio * matrix[i][k];
                 }
-                string action = "Fila " + to_string(j + 1) + " + " + "Fila " + to_string(i + 1) + " * " + to_string(-ratio);
-                cout << dye::colorize(action,"aqua") << endl;
+                string action = "Fila " + to_string(j + 1) + " + Fila " + to_string(i + 1) + " * " + to_string(-ratio);
+                cout << dye::colorize(action, "aqua") << endl;
                 printAugmentedMatrix(matrix);
                 cout << endl;
             }
         }
     }
+
+    // Normalizar cada fila dividiendo por el pivote
     for (int i = 0; i < n; i++)
     {
-        double ratio = matrix[i][i];
+        double pivot = matrix[i][i];
         for (int j = 0; j <= n; j++)
         {
-            matrix[i][j] = matrix[i][j] / ratio;
+            matrix[i][j] = matrix[i][j] / pivot;
         }
     }
+
     printAugmentedMatrix(matrix);
+    cout << endl;
     for (int i = 0; i < n; i++)
     {
         string result = "X" + to_string(i + 1) + " = " + to_string(matrix[i][n]);
         cout << dye::colorize(result, "aqua").invert() << endl;
     }
-    system("pause");
+    pauseScreen();
 }
 
 void fillMatrix()
 {
     /*
-    Pedira ingresar un valor N para generar una matriz N*N+1, interpretando N+1 como
-    el resultado de la matriz aumentada y luego en base a la matriz solicitada permitira al usuario
-    ingresar los valores de la matriz.
-    Luego llamara a la funcion encargada de resolver la matriz.
+    Solicita N y construye una matriz aumentada NxN+1.
+    Acepta valores decimales (double).
     */
     int n;
-    int val;
     cout << "Introduce N para realizar la matriz NxN: ";
     cin >> n;
     vector<vector<double>> vec;
@@ -80,12 +92,13 @@ void fillMatrix()
     {
         for (int j = 0; j < n + 1; j++)
         {
-            cout << "Introduce el valor de la posición [" << i << "][" << j << "]: ";
+            double val;
+            cout << "Introduce el valor de la posicion [" << i << "][" << j << "]: ";
             cin >> val;
             vec[i].push_back(val);
         }
     }
-    system("cls");
+    system("clear");
     cout << "La matriz ingresada fue: " << endl;
     printAugmentedMatrix(vec);
     solve(vec, n);
@@ -93,27 +106,24 @@ void fillMatrix()
 
 void fillMatrixFromParsedEquation(vector<vector<Coeficient>> equation) {
     /*
-    Tomara como parametro un vector de vectores formados con Coefiecientes, los cuales
-    representan una ecuacion y los ordenará para luego generar una matriz y llamar a
-    la funcion solve, la cual se encargará de resolverla.
+    Convierte un sistema de ecuaciones parseado en una matriz aumentada y lo resuelve.
     */
     vector<vector<double>> vec;
     equation = orderCoeficients(equation);
     int n = equation[0].size();
 
-    for (int i = 0; i < equation.size(); i++)
+    for (int i = 0; i < (int)equation.size(); i++)
     {
         vec.push_back(vector<double>());
     }
-    for (int i = 0; i < equation.size(); i++)
+    for (int i = 0; i < (int)equation.size(); i++)
     {
         for (int j = 0; j < n; j++)
         {
             vec[i].push_back(equation[i][j].value);
         }
-
     }
-    system("cls");
+    system("clear");
     cout << "La matriz ingresada fue:" << endl;
     printAugmentedMatrix(vec);
     solve(vec, equation.size());

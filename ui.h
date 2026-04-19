@@ -1,16 +1,20 @@
-﻿#pragma once
+#pragma once
 #include <iostream>
 #include <vector>
+#include <limits>
 #include <math.h>
 #include "color.hpp"
 
 using namespace std;
 
+void pauseScreen() {
+    cout << "\nPresiona Enter para continuar...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
+}
+
 void printMenu()
 {
-    /*
-    Funcion encargada de imprimir el menu principal del progrmama.
-    */
     cout << dye::colorize("  _____         __  __ _____      ______ _    _  ____  ", "red") << endl;
     cout << dye::colorize(" / ____|  /\\   |  \\/  |  __ \\/\\  /  ____| |  | |/ __ \\ ", "red") << endl;
     cout << dye::colorize("| (___   /  \\  | \\  / | |__)/  \\ | |    | |__| | |  | |", "red") << endl;
@@ -31,43 +35,39 @@ void printMenu()
 }
 
 void help() {
-    /*
-    Funcion encargada de imprimir ayuda e informacion de como funciona el sistema.
-    */
     cout << dye::colorize("AYUDA", "aqua").invert() << endl;
-    cout << dye::colorize("1)", "aqua").invert() << " Resolver sistema de ecuaciones. Como funciona esta opcion? " << endl;
-    cout << " Dentro de esta opcion tendras la posibilidad de resolver algun sistema ecuacion. Para ello deberas introducir el numero de ecuaciones que conforman el sistema y sus ecuaciones. " << endl;
-    cout << " Ej. : " << endl;
-    cout << " 1)	4x + 1y = -3 " << endl;
-    cout << " 2)	2y - 1x = 2 " << endl;
-    cout << " Los coeficientes pueden ser puestos en distinto orden y toda variable debe estar acompañada de su valor. 2y - x = 2 NO seria un ejemplo valido. " << endl;
-    cout << " - Aclaracion: solo funciona con sistemas NxN. " << endl;
+    cout << dye::colorize("1)", "aqua").invert() << " Resolver sistema de ecuaciones." << endl;
+    cout << " Introduce el numero de ecuaciones y cada una en formato: 4x+1y=-3" << endl;
+    cout << " Toda variable debe tener su coeficiente. Ej: 1x-2y=5 (no 'x-2y=5')" << endl;
+    cout << " Solo funciona con sistemas NxN." << endl;
     cout << endl;
-    cout << dye::colorize("2)", "aqua").invert() << " Resolver matriz NxN. Como funciona esta opcion? " << endl;
-    cout << "En esta opcion se debera introducir una matriz aumentada y este arrojara la solución de la misma mostrando paso por paso. " << endl;
+    cout << dye::colorize("2)", "aqua").invert() << " Resolver matriz NxN aumentada." << endl;
+    cout << " Introduce N y luego los valores de la matriz aumentada (N columnas + resultado)." << endl;
     cout << endl;
-    cout << dye::colorize("3)", "aqua").invert() << " Realizar suma de matrices. " << endl;
-    cout << " Para utilizar esta opcion, el usuario ingresara la cantidad de filas y columnas de las dos matrices que quiere sumar y los valores de la matriz. " << endl;
-    cout << " NOTA: Lo mismo ocurre con la resta, multiplicacion y transponer de una matriz. " << endl;
+    cout << dye::colorize("3)", "aqua").invert() << " Suma de matrices." << endl;
+    cout << " Ambas matrices deben tener las mismas dimensiones." << endl;
     cout << endl;
-    cout << dye::colorize("4)", "aqua").invert() << " Determinante de una matriz. " << endl;
-    cout << " Se ingresa una matriz cuadrada y este arrojara el determinante de esta. " << endl;
+    cout << dye::colorize("4)", "aqua").invert() << " Resta de matrices." << endl;
+    cout << " Ambas matrices deben tener las mismas dimensiones." << endl;
+    cout << endl;
+    cout << dye::colorize("5)", "aqua").invert() << " Multiplicacion de matrices." << endl;
+    cout << " Las columnas de la primera deben ser iguales a las filas de la segunda." << endl;
+    cout << endl;
+    cout << dye::colorize("6)", "aqua").invert() << " Transponer una matriz." << endl;
+    cout << endl;
+    cout << dye::colorize("7)", "aqua").invert() << " Determinante de una matriz cuadrada." << endl;
 }
 
 void printMatrix(vector<vector<double>> matrix)
 {
-    /*
-    Funcion encargada de imprimir matrices.
-    */
-    for (int i = 0; i < matrix.size(); i++)
+    for (int i = 0; i < (int)matrix.size(); i++)
     {
         cout << "[";
-        for (int j = 0; j < matrix[i].size(); j++)
+        for (int j = 0; j < (int)matrix[i].size(); j++)
         {
-            if (j == matrix[i].size() - 1)
+            if (j == (int)matrix[i].size() - 1)
             {
                 cout << matrix[i][j] << "]";
-                continue;
             }
             else
             {
@@ -80,20 +80,16 @@ void printMatrix(vector<vector<double>> matrix)
 
 void printAugmentedMatrix(vector<vector<double>> matrix)
 {
-    /*
-    Funcion encargada de imprimir matrices aumentadas.
-    */
-    for (int i = 0; i < matrix.size(); i++)
+    for (int i = 0; i < (int)matrix.size(); i++)
     {
         cout << "[";
-        for (int j = 0; j < matrix[i].size(); j++)
+        for (int j = 0; j < (int)matrix[i].size(); j++)
         {
-            if (j == matrix[i].size() - 1)
+            if (j == (int)matrix[i].size() - 1)
             {
                 cout << "|   " << matrix[i][j] << "]";
-                continue;
             }
-            else if (j == matrix[i].size() - 2)
+            else if (j == (int)matrix[i].size() - 2)
             {
                 cout << matrix[i][j] << "   ";
             }
@@ -106,18 +102,12 @@ void printAugmentedMatrix(vector<vector<double>> matrix)
     }
 }
 
-
-
 vector<vector<double>> reqMatrix()
 {
-    /*
-    Generara una matriz de tamaño N*M, siendo N y M valores ingresados por el usuario, luego
-    en base a N y M solicitara cada uno de los elementos de la matriz y retornara la matriz generada.
-    */
     int n, m;
-    cout << "Ingrese el número de filas: ";
+    cout << "Ingrese el numero de filas: ";
     cin >> n;
-    cout << "Ingrese el número de columnas: ";
+    cout << "Ingrese el numero de columnas: ";
     cin >> m;
     vector<vector<double>> matrix;
     for (int i = 0; i < n; i++)
@@ -126,7 +116,7 @@ vector<vector<double>> reqMatrix()
         for (int j = 0; j < m; j++)
         {
             double value;
-            cout << "Ingrese el valor de la posición [" << i << "][" << j << "]: ";
+            cout << "Ingrese el valor de la posicion [" << i << "][" << j << "]: ";
             cin >> value;
             row.push_back(value);
         }

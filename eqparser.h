@@ -4,43 +4,41 @@
 #include <math.h>
 #include <string>
 
-
 using namespace std;
-
 
 struct Coeficient
 {
-    int value;
+    double value;
     string var;
 };
 
 Coeficient lookupComponent(vector<Coeficient> eq, string correctVar) {
     /*
-    Tomara como paramentro un vector de coeficientes, el cual representa una ecuacion, y la variable
-    de la ecuacion a buscar, una vez encontrada la retornara.
+    Busca una variable dentro de un vector de coeficientes.
+    Si no la encuentra, retorna un coeficiente con valor 0.
     */
-    for (int i = 0; i < eq.size(); i++) {
+    for (int i = 0; i < (int)eq.size(); i++) {
         if (eq[i].var == correctVar) {
             return eq[i];
         }
     }
+    Coeficient notFound;
+    notFound.value = 0;
+    notFound.var = correctVar;
+    return notFound;
 }
 
 vector<vector<Coeficient>> orderCoeficients(vector<vector<Coeficient>> eq) {
     /*
-    Tomara como parametro un vector de vectores formados con Coefiecientes, los cuales
-    representan una ecuacion.
-    En base a la primera ecuacion se definira el orden el cual los elementos deben utilizar y luego
-    se corroborara que los coeficientes lo cumplan, en caso de no hacerlo se intercambiaran de posicion
-    los coeficientes afectados.
+    Ordena los coeficientes de cada ecuacion segun el orden de la primera.
     */
     vector<vector<Coeficient>> equation = eq;
     vector<string> varOrder;
-    for (int i = 0; i < eq[0].size(); i++) {
+    for (int i = 0; i < (int)eq[0].size(); i++) {
         varOrder.push_back(eq[0][i].var);
     }
-    for (int i = 0; i < eq.size(); i++) {
-        for (int j = 0; j < eq[i].size(); j++) {
+    for (int i = 0; i < (int)eq.size(); i++) {
+        for (int j = 0; j < (int)eq[i].size(); j++) {
             if (eq[i][j].var != varOrder[j]) {
                 Coeficient correctedCoef = lookupComponent(eq[i], varOrder[j]);
                 equation[i][j].var = correctedCoef.var;
@@ -54,24 +52,22 @@ vector<vector<Coeficient>> orderCoeficients(vector<vector<Coeficient>> eq) {
 vector<Coeficient> cleanCoeficients(vector<string> coeficients)
 {
     /*
-    Toma como parametro un vector de strings correspondientes a coeficientes
-    de una ecuacion y combierte a cada elemento a una estructura Coeficiente,
-    a la cual se le asigna un valor y su variable. Cada uno de estos elementos
-    se los agrega al vector que será retornado.
+    Convierte strings de coeficientes a estructuras Coeficient con valor (double) y variable.
     */
     vector<Coeficient> result;
-    for (int i = 0; i < coeficients.size(); i++)
+    for (int i = 0; i < (int)coeficients.size(); i++)
     {
         Coeficient coef;
         if (isdigit(coeficients[i].back()))
         {
+            // Es el termino independiente (lado derecho del =)
             if (coeficients[i].front() == '-')
             {
-                coef.value = -1 * stoi(coeficients[i].substr(1, coeficients[i].size() - 1));
+                coef.value = -1 * stod(coeficients[i].substr(1, coeficients[i].size() - 1));
             }
             else
             {
-                coef.value = stoi(coeficients[i].substr(1, coeficients[i].size() - 1));
+                coef.value = stod(coeficients[i].substr(1, coeficients[i].size() - 1));
             }
             coef.var = "X" + to_string(1);
             result.push_back(coef);
@@ -79,13 +75,13 @@ vector<Coeficient> cleanCoeficients(vector<string> coeficients)
         }
         if (coeficients[i].front() == '-')
         {
-            coef.var = coeficients[i].back();
-            coef.value = -1 * stoi(coeficients[i].substr(1, coeficients[i].size() - 2));
+            coef.var = string(1, coeficients[i].back());
+            coef.value = -1 * stod(coeficients[i].substr(1, coeficients[i].size() - 2));
         }
         else
         {
-            coef.var = coeficients[i].back();
-            coef.value = stoi(coeficients[i].substr(1, coeficients[i].size() - 2));
+            coef.var = string(1, coeficients[i].back());
+            coef.value = stod(coeficients[i].substr(1, coeficients[i].size() - 2));
         }
         result.push_back(coef);
     }
@@ -95,22 +91,15 @@ vector<Coeficient> cleanCoeficients(vector<string> coeficients)
 vector<Coeficient> parseEqCoeficients(string equation)
 {
     /*
-    Funcion que separa la ecuacion en sus distintos coeficientes.
-    Toma como parametro un string que representa a una ecuacion y luego
-    en base a los signos reconoce los coeficientes de la ecuacion y los guarda
-    en un vector de strings. Una vez guardados se limpiaran y se retornara
-    un vector de Struct::Coeficientes.
+    Separa una ecuacion en sus coeficientes.
+    Formato esperado: 4x+1y=-3  o  -1x+2y=5
 
-    --> -1x+2y=0
-    > -1x lastIndex=3
-    > +2y lastIndex=6
-    > 0
-
-    {"-1x", "+2y", 0}
+    Ejemplo: -1x+2y=0
+    > "-1x", "+2y", "+0"
     */
     int lastIndex = 0;
     vector<string> coeficients;
-    for (int i = 0; i < equation.length(); i++)
+    for (int i = 0; i < (int)equation.length(); i++)
     {
         if (equation[i] == '+' || equation[i] == '-')
         {
